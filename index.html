@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Happy Birthday Aman</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <canvas id="fireworks-canvas"></canvas>
+
+  <audio id="bg-music" autoplay loop>
+    <source src="bg.mp3" type="audio/mp3" />
+    Your browser does not support the audio element.
+  </audio>
+
+  <div class="balloons-container">
+    <div class="balloon red"></div>
+    <div class="balloon blue"></div>
+    <div class="balloon green"></div>
+    <div class="balloon yellow"></div>
+  </div>
+
+  <div class="main-message">
+    <h1>🎉 Happy Birthday Aman 🎉</h1>
+    <p class="typing">May God bless you 🙏 and give you strength, noob! 🎂✨</p>
+    <p class="question">You have 2 options 😈:<br><br>Give us a party 🎁 or<br>Jump from Burj Khalifa 🏙️</p>
+
+    <div class="buttons">
+      <button onclick="showResponse('party')">Give Party</button>
+      <button onclick="showResponse('jump')">Jump from Burj Khalifa</button>
+    </div>
+
+    <p class="response" id="responseBox"></p>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
