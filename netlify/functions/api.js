@@ -69,7 +69,7 @@ export default async (request) => {
       }
 
       let path =
-        "articles?select=id,title,slug,excerpt,content,category,tags,status,published_at,updated_at,created_at&order=published_at.desc.nullslast";
+        "articles?select=id,title,slug,excerpt,content,category,tags,status,cover_image,published_at,updated_at,created_at&order=published_at.desc.nullslast";
 
       if (q.slug) {
         path += `&slug=eq.${encodeURIComponent(q.slug)}`;
