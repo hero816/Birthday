@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Sitemap: https://charming-parfait-d81384.netlify.app/sitemap.xml
