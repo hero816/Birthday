@@ -1,0 +1,1 @@
+const themeBtn=document.getElementById("themeBtn");themeBtn?.addEventListener("click",()=>{document.body.classList.toggle("light");localStorage.setItem("gm-theme",document.body.classList.contains("light")?"light":"dark")});if(localStorage.getItem("gm-theme")==="light")document.body.classList.add("light");
