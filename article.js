@@ -1,1 +1,15 @@
-(async()=>{const box=document.querySelector("#article"),slug=new URLSearchParams(location.search).get("slug");if(!slug){box.innerHTML='<div class="empty">No article selected.</div>';return}const r=await fetch("/api/articles?slug="+encodeURIComponent(slug));const d=await r.json();if(!r.ok||!d[0]){box.innerHTML='<div class="empty">Article not found.</div>';return}const a=d[0];document.title=a.title+" • GlitchMango 🥭";document.querySelector('meta[name="description"]').content=a.excerpt||a.title;box.innerHTML='<article class="prose"><p class="eyebrow">'+esc(a.category)+'</p><h1>'+esc(a.title)+'</h1><p class="article-meta">'+new Date(a.published_at||a.created_at).toLocaleDateString()+' · '+a.tags.map(esc).join(" · ")+'</p><div class="markdown">'+DOMPurify.sanitize(marked.parse(a.content||""))+'</div></article>'})().catch(()=>document.querySelector("#article").innerHTML='<div class="empty">Could not load this article.</div>');function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+(async()=>{
+  const box=document.querySelector("#article"),slug=new URLSearchParams(location.search).get("slug");
+  if(!slug){box.innerHTML='<div class="empty">No article selected.</div>';return}
+  try{
+    const {data:a,error}=await sb.from("articles").select("*").eq("slug",slug).eq("status","published").maybeSingle();
+    if(error)throw error;
+    if(!a){box.innerHTML='<div class="empty">Article not found.</div>';return}
+    document.title=a.title+" • GlitchMango 🥭";
+    document.querySelector('meta[name="description"]').content=a.excerpt||a.title;
+    box.innerHTML='<article class="prose"><p class="eyebrow">'+esc(a.category)+'</p><h1>'+esc(a.title)+'</h1><p class="article-meta">'+new Date(a.published_at||a.created_at).toLocaleDateString()+' · '+(a.tags||[]).map(esc).join(" · ")+'</p><div class="markdown">'+DOMPurify.sanitize(marked.parse(a.content||""))+'</div></article>';
+  }catch(e){
+    box.innerHTML='<div class="empty">Could not load this article. '+esc(e.message||"Unknown error")+'</div>';
+  }
+})();
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
