@@ -1,15 +1,2 @@
-(async()=>{
-  const box=document.querySelector("#article"),slug=new URLSearchParams(location.search).get("slug");
-  if(!slug){box.innerHTML='<div class="empty">No article selected.</div>';return}
-  try{
-    const {data:a,error}=await sb.from("articles").select("*").eq("slug",slug).eq("status","published").maybeSingle();
-    if(error)throw error;
-    if(!a){box.innerHTML='<div class="empty">Article not found.</div>';return}
-    document.title=a.title+" • GlitchMango 🥭";
-    document.querySelector('meta[name="description"]').content=a.excerpt||a.title;
-    box.innerHTML='<article class="prose"><p class="eyebrow">'+esc(a.category)+'</p><h1>'+esc(a.title)+'</h1><p class="article-meta">'+new Date(a.published_at||a.created_at).toLocaleDateString()+' · '+(a.tags||[]).map(esc).join(" · ")+'</p><div class="markdown">'+DOMPurify.sanitize(marked.parse(a.content||""))+'</div></article>';
-  }catch(e){
-    box.innerHTML='<div class="empty">Could not load this article. '+esc(e.message||"Unknown error")+'</div>';
-  }
-})();
-function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+const SUPABASE_URL="https://xpzufexzbrlddthdvgve.supabase.co",SUPABASE_ANON_KEY="sb_publishable_MVBg7lMChhL52f30zx-JxA_SBL1vSHZ";const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+(async()=>{const box=document.querySelector("#article"),slug=new URLSearchParams(location.search).get("slug");if(!slug){box.innerHTML='<div class="empty">No article selected.</div>';return}try{const {data:a,error}=await sb.from("articles").select("*").eq("slug",slug).eq("status","published").maybeSingle();if(error)throw error;if(!a){box.innerHTML='<div class="empty">Article not found.</div>';return}document.title=a.title+" • GlitchMango 🥭";document.querySelector('meta[name="description"]').content=a.excerpt||a.title;box.innerHTML='<article class="prose"><p class="eyebrow">'+esc(a.category)+'</p><h1>'+esc(a.title)+'</h1>'+(a.cover_image?'<img class="article-cover" src="'+esc(a.cover_image)+'" alt="">':'')+'<p class="article-meta">'+new Date(a.published_at||a.created_at).toLocaleDateString()+' · '+(a.tags||[]).map(esc).join(" · ")+'</p><div class="markdown">'+DOMPurify.sanitize(marked.parse(a.content||""))+'</div></article>'}catch(e){box.innerHTML='<div class="empty">Could not load this article. '+esc(e.message||"Unknown error")+'</div>'}})();function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
