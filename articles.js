@@ -1,5 +1,32 @@
-const grid=document.querySelector("#articleGrid"),search=document.querySelector("#search"),category=document.querySelector("#category");let timer;
-function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-async function load(){grid.innerHTML='<div class="empty">Loading…</div>';const p=new URLSearchParams();if(search.value.trim())p.set("search",search.value.trim());if(category.value)p.set("category",category.value);const r=await fetch("/api/articles?"+p);const data=await r.json();if(!r.ok){grid.innerHTML='<div class="empty">The article database is not ready yet. Run supabase-schema.sql first.</div>';return}grid.innerHTML=data.length?data.map(a=>'<article class="article-card"><p class="eyebrow">'+esc(a.category)+'</p><h2><a href="/article.html?slug='+encodeURIComponent(a.slug)+'">'+esc(a.title)+'</a></h2><p>'+esc(a.excerpt||"Practical GlitchMango guide.")+'</p><a class="read" href="/article.html?slug='+encodeURIComponent(a.slug)+'">Read article →</a></article>').join(""):'<div class="empty">No articles found.</div>'}
-async function cats(){const r=await fetch("/api/articles?categories=1");if(!r.ok)return;const d=await r.json();category.innerHTML='<option value="">All categories</option>'+d.map(c=>'<option value="'+esc(c.name)+'">'+esc(c.name)+'</option>').join("")}
-search.addEventListener("input",()=>{clearTimeout(timer);timer=setTimeout(load,250)});category.addEventListener("change",load);cats();load();
+const SUPABASE_URL="https://xpzufexzbrlddthdvgve.supabase.co",SUPABASE_ANON_KEY="sb_publishable_MVBg7lMChhL52f30zx-JxA_SBL1vSHZ";
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+const grid=document.querySelector("#articleGrid"),search=document.querySelector("#search"),category=document.querySelector("#category");
+let timer;
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+async function load(){
+  grid.innerHTML='<div class="empty">Loading…</div>';
+  try{
+    let q=sb.from("articles").select("id,title,slug,excerpt,category,tags,status,published_at,created_at")
+      .eq("status","published").order("published_at",{ascending:false});
+    if(search.value.trim()){
+      const s=search.value.trim().replace(/[%_,]/g," ");
+      q=q.or("title.ilike.%"+s+"%,excerpt.ilike.%"+s+"%,content.ilike.%"+s+"%");
+    }
+    if(category.value)q=q.eq("category",category.value);
+    const {data,error}=await q.limit(24);
+    if(error)throw error;
+    grid.innerHTML=data.length?data.map(a=>'<article class="article-card"><p class="eyebrow">'+esc(a.category)+'</p><h2><a href="/article.html?slug='+encodeURIComponent(a.slug)+'">'+esc(a.title)+'</a></h2><p>'+esc(a.excerpt||"Practical GlitchMango guide.")+'</p><a class="read" href="/article.html?slug='+encodeURIComponent(a.slug)+'">Read article →</a></article>').join(""):'<div class="empty">No articles found.</div>';
+  }catch(e){
+    grid.innerHTML='<div class="empty">Could not load articles. '+esc(e.message||"Unknown error")+'</div>';
+  }
+}
+async function cats(){
+  try{
+    const {data,error}=await sb.from("categories").select("name").order("name");
+    if(error)throw error;
+    category.innerHTML='<option value="">All categories</option>'+data.map(c=>'<option value="'+esc(c.name)+'">'+esc(c.name)+'</option>').join("");
+  }catch{}
+}
+search.addEventListener("input",()=>{clearTimeout(timer);timer=setTimeout(load,250)});
+category.addEventListener("change",load);
+cats();load();
